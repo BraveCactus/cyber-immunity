@@ -1,0 +1,62 @@
+%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "clusterBkg": "#ffffff", "clusterBorder": "#cbd5e1", "lineColor": "#1f2937", "primaryTextColor": "#1f2937", "fontFamily": "trebuchet ms, verdana, arial, sans-serif"}}}%%
+flowchart LR
+    subgraph Values["Ценности"]
+        direction TB
+        V1["Персональные данные покупателей и продавцов"]
+        V2["Данные для проведения платежей"]
+        V3["Данные заказов: состав, сумма, адрес, статус"]
+        V4["Каталог товаров, цены"]
+        V5["Учётные записи продавцов"]
+        V6["Учётные записи администраторов"]
+        V7["Средства и расчёты продавцов"]
+        V8["Отзывы и рейтинги"]
+        V9["Логи и события безопасности"]
+    end
+
+    subgraph Events["Негативные события"]
+        direction TB
+        E1["Утечка данных, неправомерный доступ, потеря аккаунта"]
+        E2["Кража личных средств, вывод денег"]
+        E3["Подмена или искажение достоверных данных"]
+        E4["Несанкционированное изменение информации о товарах"]
+        E5["Захват аккаунта"]
+        E6["Зловредное использование прав администратора"]
+        E7["Несанкционированная выплата"]
+        E8["Накрутка или фальсификация"]
+        E9["Уничтожение или подмена"]
+    end
+
+    subgraph Damage["Ущерб"]
+        direction TB
+        D1["Высокий: потеря доверия и критичных данных"]
+        D2["Критический: финансовые потери"]
+        D3["Высокий: неверная доставка, споры, возвраты"]
+        D4["Высокий: финансовые потери, недоверие"]
+        D5["Высокий: мошеннические товары, вывод средств"]
+        D6["Критический: полный контроль над платформой"]
+        D7["Средний: искажение выбора, репутационные потери"]
+        D8["Высокий: невозможно расследовать инцидент"]
+    end
+
+    style Values fill:#ffffff,stroke:#cbd5e1
+    style Events fill:#ffffff,stroke:#cbd5e1
+    style Damage fill:#ffffff,stroke:#cbd5e1
+
+    V1 --> E1 --> D1
+    V2 --> E2 --> D2
+    V3 --> E3 --> D3
+    V4 --> E4 --> D4
+    V5 --> E5 --> D5
+    V6 --> E6 --> D6
+    V7 --> E7 --> D2
+    V8 --> E8 --> D7
+    V9 --> E9 --> D8
+
+    classDef value fill:#e8f1ff,stroke:#4a7ebb,color:#1f2937
+    classDef event fill:#fff1e6,stroke:#c27c3e,color:#1f2937
+    classDef damage fill:#fdecec,stroke:#b85c5c,color:#1f2937
+    class V1,V2,V3,V4,V5,V6,V7,V8,V9 value
+    class E1,E2,E3,E4,E5,E6,E7,E8,E9 event
+    class D1,D2,D3,D4,D5,D6,D7,D8 damage
+
+    linkStyle default stroke:#1f2937,stroke-width:2px
