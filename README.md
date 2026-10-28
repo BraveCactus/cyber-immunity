@@ -1,8 +1,38 @@
-# kiber-immunity
+# cyber-immunity
+
+**Тема:** Сервис онлайн-маркетплейса как система для анализа с точки зрения кибербезопасности
 
 Учебный проект по проектированию сложной технической системы с кибериммунным подходом.
 
-**Тема:** Сервис онлайн-маркетплейса как система для анализа с точки зрения кибербезопасности.
+## Структура проекта
+
+```text
+cyber-immunity/
+├── README.md
+├── TS.md
+├── CONTRIBUTING.md
+├── docs/
+│   ├── common/
+│   │   └── glossary.md          # термины
+│   ├── source/
+│   │   └── assignment.docx      # ТЗ
+│   ├── customer/
+│   │   ├── kbp.md            # ценности, события, ущерб
+│   │   ├── context.md        # контекстная диаграмма
+│   │   ├── use-cases.md      # базовые сценарии
+│   │   └── diagrams/
+│   ├── architecture/
+│   │   ├── hla.md
+│   │   ├── components.md
+│   │   ├── use-cases-hla.md
+│   │   └── diagrams/
+│   ├── security/
+│   │   ├── objectives.md     # ЦПБ
+│   │   ├── negative-scenarios.md
+│   │   ├── architecture-policy.md
+│   │   └── diagrams/
+│   └── report.md             # итоговая работа
+```
 
 ## Этапы со стороны Заказчика
 
