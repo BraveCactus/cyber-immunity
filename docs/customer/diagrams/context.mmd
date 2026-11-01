@@ -1,0 +1,52 @@
+%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#e8f1ff", "primaryTextColor": "#1f2937", "primaryBorderColor": "#4a7ebb", "lineColor": "#1f2937", "secondaryColor": "#fff1e6", "tertiaryColor": "#fdecec", "noteBkgColor": "#f8fafc", "noteBorderColor": "#cbd5e1", "noteTextColor": "#1f2937", "fontFamily": "trebuchet ms, verdana, arial, sans-serif"}}}%%
+stateDiagram-v2
+    direction TB
+
+    state "Просмотр каталога" as Catalog
+    state "Оформление заказа" as Checkout
+    state "Ожидание оплаты" as AwaitingPayment
+    state "Оплачен" as Paid
+    state "Комплектация" as Packing
+    state "Приостановлен" as Suspended
+    state "Передача в доставку" as Handover
+    state "В доставке" as InDelivery
+    state "Доставлен" as Delivered
+    state "Возврат" as Return
+    state "Завершён" as Completed
+    state "Отменён" as Cancelled
+
+    [*] --> Catalog
+    Catalog --> Checkout: покупатель выбрал товар
+    Checkout --> AwaitingPayment: заказ создан
+    AwaitingPayment --> Paid: платёжный сервис подтвердил оплату
+    AwaitingPayment --> Cancelled: отказ или таймаут
+    Paid --> Packing: продавец принял заказ
+    Packing --> Suspended: администратор или поддержка
+    Suspended --> Packing: проверка завершена
+    Suspended --> Cancelled: нарушение правил
+    Packing --> Handover: продавец передал заказ
+    Handover --> InDelivery: служба доставки приняла заказ
+    InDelivery --> Delivered: служба доставки передала статус
+    Delivered --> Completed: покупатель подтвердил получение
+    Delivered --> Return: покупатель запросил возврат
+    Return --> Completed: возврат обработан
+    Packing --> Cancelled: продавец отменил заказ
+    Paid --> Return: покупатель отменил заказ
+    Completed --> [*]
+    Cancelled --> [*]
+
+    note right of AwaitingPayment
+      Платёжный сервис:
+      запрос на оплату,
+      подтверждение или отказ
+    end note
+
+    note right of Paid
+      Сервис уведомлений:
+      письма покупателю и продавцу
+    end note
+
+    note right of InDelivery
+      Служба доставки:
+      статусы и данные заказа
+    end note
