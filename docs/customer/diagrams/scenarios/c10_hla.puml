@@ -1,0 +1,42 @@
+@startuml
+title С10. Отзыв о заказе (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Витрина\nпокупателя" as Store
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nотзывов" as Review
+participant "Сервис\nзаказов" as Order
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Buyer -> Store : оставить отзыв\n(заказ, оценка, текст)
+Store -> API : создать отзыв (токен)
+API -> Auth : проверить токен
+Auth --> API : id покупателя, роль
+API -> Review : создать отзыв\n(id покупателя, id заказа, оценка, текст)
+Review -> Order : проверить заказ
+Order --> Review : принадлежит покупателю,\nстатус «Выполнен»
+break заказ чужой, не выполнен или отзыв уже есть
+  Review --> API : отказ
+  API --> Store : отказ
+  Store --> Buyer : сообщение об отказе
+end
+Review -> Review : сохранить отзыв,\nпересчитать рейтинг
+Review -> Bus : событие «отзыв добавлен»
+Bus -> Log : событие для журнала
+Review --> API : отзыв принят
+API --> Store : отзыв опубликован
+Store --> Buyer : отзыв опубликован
+@enduml

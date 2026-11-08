@@ -1,0 +1,25 @@
+@startuml
+title С12. Управление ролями администратором
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Администратор" as Admin
+participant "Сервис\nонлайн-маркетплейса" as S
+
+Admin -> S : изменить роль пользователя\n(пользователь, роль, код подтверждения)
+S -> S : проверить права администратора\nи код подтверждения
+break проверка не пройдена
+  S --> Admin : отказ
+end
+S -> S : изменить роль,\nзавершить активные сессии пользователя
+S --> Admin : роль изменена
+@enduml

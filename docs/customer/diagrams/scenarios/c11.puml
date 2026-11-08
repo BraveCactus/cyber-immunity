@@ -1,0 +1,26 @@
+@startuml
+title С11. Приостановка заказа и разбор обращения 
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+actor "Служба\nподдержки" as Support
+participant "Сервис\nонлайн-маркетплейса" as S
+
+Buyer -> S : обращение по заказу\n(причина)
+S --> Buyer : обращение принято
+Support -> S : рассмотреть обращение
+S --> Support : обращение, данные\nи история заказа
+Support -> S : приостановить заказ\n(причина)
+S -> S : заказ в статусе «Приостановлен»,\nдействие сохранено в журнале
+S --> Support : заказ приостановлен
+@enduml

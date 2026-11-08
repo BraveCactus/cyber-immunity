@@ -1,0 +1,25 @@
+@startuml
+title С8. Управление товарами продавцом
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Сервис\nонлайн-маркетплейса" as S
+
+Seller -> S : добавить или изменить товар\n(описание, цена, остаток)
+S -> S : проверить, что товар принадлежит продавцу
+break товар другого продавца
+  S --> Seller : отказ
+end
+S -> S : сохранить изменения,\nзаписать историю,\nотправить на модерацию
+S --> Seller : товар принят,\nстатус «На модерации»
+@enduml

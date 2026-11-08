@@ -1,0 +1,29 @@
+@startuml
+title С5. Комплектация и передача в доставку
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Сервис\nонлайн-маркетплейса" as S
+participant "Служба\nдоставки" as DelivExt #FFF4E0
+participant "Сервис\nуведомлений" as NotifExt #FFF4E0
+actor "Покупатель" as Buyer
+
+Seller -> S : запросить заказы
+S --> Seller : заказы к комплектации
+Seller -> S : заказ собран,\nпередать в доставку
+S -> DelivExt : адрес и состав заказа
+DelivExt --> S : заказ принят
+S -> NotifExt : письмо о статусе заказа\n(адрес, шаблон)
+NotifExt --> Buyer : письмо: заказ в доставке
+S --> Seller : статус «В доставке»
+@enduml

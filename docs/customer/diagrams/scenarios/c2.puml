@@ -1,0 +1,20 @@
+@startuml
+title С2. Просмотр каталога
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Сервис\nонлайн-маркетплейса" as S
+
+Buyer -> S : поиск и просмотр товаров
+S --> Buyer : товары, описания,\nцены, рейтинги
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+title С5. Комплектация и передача в доставку (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Кабинет\nпродавца" as SellerUI
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nзаказов" as Order
+participant "Интегратор\nдоставки" as Delivery
+participant "Служба\nдоставки" as DelivExt #FFF4E0
+participant "Шина\nсобытий" as Bus
+participant "Сервис\nуведомлений" as Notify
+participant "Внешний сервис\nуведомлений" as NotifExt #FFF4E0
+participant "Логирование" as Log
+
+Seller -> SellerUI : открыть список заказов
+SellerUI -> API : запрос заказов продавца (токен)
+API -> Auth : проверить токен
+Auth --> API : id продавца, роль «продавец»
+note right of API : На каждом запросе API проверяет токен\n(дальше на диаграмме не показано)
+API -> Order : заказы продавца\n(id продавца, роль)
+Order --> API : заказы в статусе «Комплектация»
+API --> SellerUI : список заказов
+SellerUI --> Seller : список заказов
+Seller -> SellerUI : заказ собран,\nпередать в доставку
+SellerUI -> API : передать в доставку (токен)
+API -> Order : передать в доставку\n(id заказа, id продавца, роль)
+Order -> Order : проверить: заказ принадлежит продавцу,\nстатус «Комплектация»
+break проверка не пройдена
+  Order --> API : отказ
+  API --> SellerUI : отказ
+  SellerUI --> Seller : сообщение об отказе
+end
+Order -> Delivery : передать в доставку\n(адрес, состав заказа)
+Delivery -> DelivExt : заказ на доставку\n(адрес, состав)
+DelivExt --> Delivery : id отправления, принят
+Delivery --> Order : передан в доставку
+Order -> Order : статус «В доставке»
+Order -> Bus : событие «заказ передан в доставку»\n(id заказа, email покупателя)
+par
+  Bus -> Notify : заказ в доставке
+  Notify -> NotifExt : письмо покупателю
+else
+  Bus -> Log : события для журнала
+end
+Order --> API : статус обновлён
+API --> SellerUI : статус «В доставке»
+SellerUI --> Seller : заказ передан в доставку
+@enduml

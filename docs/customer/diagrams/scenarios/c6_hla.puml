@@ -1,0 +1,40 @@
+@startuml
+title С6. Доставка и завершение заказа (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+participant "Служба\nдоставки" as DelivExt #FFF4E0
+participant "Интегратор\nдоставки" as Delivery
+participant "Шина\nсобытий" as Bus
+participant "Сервис\nзаказов" as Order
+participant "Сервис расчета\nс продавцами" as Payout
+participant "Сервис\nуведомлений" as Notify
+participant "Внешний сервис\nуведомлений" as NotifExt #FFF4E0
+participant "Логирование" as Log
+
+DelivExt -> Delivery : статус доставки\n(id отправления, «доставлен»)
+note right of Delivery : Промежуточные статусы («в пути»)\nобрабатываются так же, без начисления
+Delivery -> Bus : событие «статус доставки»
+Bus -> Order : статус доставки
+Order -> Order : статус «Выполнен»
+Order -> Bus : событие «заказ выполнен»\n(id заказа, продавец, сумма, email покупателя)
+par
+  Bus -> Payout : заказ выполнен
+  Payout -> Payout : начислить продавцу сумму\nза вычетом комиссии
+  Payout -> Bus : событие «начислено продавцу»
+else
+  Bus -> Notify : заказ выполнен
+  Notify -> NotifExt : письмо покупателю
+else
+  Bus -> Log : события для журнала
+end
+@enduml

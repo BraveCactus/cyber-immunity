@@ -1,0 +1,25 @@
+@startuml
+title С10. Отзыв о заказе
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Сервис\nонлайн-маркетплейса" as S
+
+Buyer -> S : оставить отзыв\n(заказ, оценка, текст)
+S -> S : проверить: заказ покупателя,\nвыполнен, отзыва ещё нет
+break проверка не пройдена
+  S --> Buyer : отказ
+end
+S -> S : сохранить отзыв,\nпересчитать рейтинг
+S --> Buyer : отзыв опубликован
+@enduml

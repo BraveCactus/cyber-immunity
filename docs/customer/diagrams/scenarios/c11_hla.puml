@@ -1,0 +1,57 @@
+@startuml
+title С11. Приостановка заказа и разбор обращения (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Витрина\nпокупателя" as Store
+actor "Служба\nподдержки" as Support
+participant "Администрирование\nи поддержка" as BackUI
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nобращений" as SupportSvc
+participant "Сервис\nзаказов" as Order
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Buyer -> Store : создать обращение по заказу
+Store -> API : создать обращение (токен)
+note right of API : На каждом запросе API проверяет токен\n(здесь и дальше показано один раз)
+API -> SupportSvc : создать обращение\n(id покупателя, id заказа, текст)
+SupportSvc -> Bus : событие «обращение создано»
+Bus -> Log : событие для журнала
+SupportSvc --> API : обращение принято
+API --> Store : обращение принято
+Store --> Buyer : обращение принято
+== Разбор обращения ==
+Support -> BackUI : открыть обращение
+BackUI -> API : запрос обращения и заказа (токен)
+API -> Auth : проверить токен
+Auth --> API : id сотрудника, роль «поддержка»
+API -> SupportSvc : получить обращение
+SupportSvc -> Order : запросить данные заказа
+Order --> SupportSvc : состав, статус, история
+SupportSvc --> API : обращение и данные заказа
+API --> BackUI : обращение и данные заказа
+BackUI --> Support : обращение и заказ
+Support -> BackUI : приостановить заказ\n(причина)
+BackUI -> API : приостановить заказ (токен)
+API -> SupportSvc : приостановить заказ\n(id заказа, причина, id сотрудника, роль)
+SupportSvc -> Order : сменить статус на «Приостановлен»\n(причина, id сотрудника)
+Order -> Order : проверить допустимость перехода,\nсохранить статус
+Order -> Bus : событие «заказ приостановлен»\n(причина, кто изменил)
+Bus -> Log : событие для журнала
+Order --> SupportSvc : статус изменён
+SupportSvc --> API : заказ приостановлен
+API --> BackUI : заказ приостановлен
+BackUI --> Support : заказ приостановлен
+@enduml

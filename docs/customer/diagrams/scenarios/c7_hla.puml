@@ -1,0 +1,59 @@
+@startuml
+title С7. Возврат заказа (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Витрина\nпокупателя" as Store
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nзаказов" as Order
+participant "Платежный\nинтегратор" as Payment
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Шина\nсобытий" as Bus
+participant "Сервис расчета\nс продавцами" as Payout
+participant "Сервис\nуведомлений" as Notify
+participant "Внешний сервис\nуведомлений" as NotifExt #FFF4E0
+participant "Логирование" as Log
+
+Buyer -> Store : запросить возврат\n(заказ, причина)
+Store -> API : запрос возврата (токен)
+API -> Auth : проверить токен
+Auth --> API : id покупателя, роль
+API -> Order : запросить возврат\n(id заказа, причина, id покупателя)
+Order -> Order : проверить: заказ покупателя,\nстатус «Выполнен», срок возврата не истёк
+break условия не выполнены
+  Order --> API : отказ
+  API --> Store : отказ
+  Store --> Buyer : сообщение об отказе
+end
+Order -> Payment : вернуть деньги\n(сумма, id заказа)
+Payment -> PayExt : возврат\n(сумма, id платежа)
+Order --> API : возврат принят в обработку
+API --> Store : возврат оформляется
+Store --> Buyer : возврат оформляется
+== Завершение возврата ==
+PayExt --> Payment : результат возврата
+Payment -> Bus : событие «возврат проведён»
+Bus -> Order : возврат проведён
+Order -> Order : статус «Возврат»
+Order -> Bus : событие «заказ возвращён»\n(id заказа, email покупателя)
+par
+  Bus -> Payout : заказ возвращён
+  Payout -> Payout : отменить начисление продавцу
+else
+  Bus -> Notify : заказ возвращён
+  Notify -> NotifExt : письмо покупателю
+else
+  Bus -> Log : события для журнала
+end
+@enduml

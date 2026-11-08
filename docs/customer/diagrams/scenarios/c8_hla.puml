@@ -1,0 +1,40 @@
+@startuml
+title С8. Управление товарами продавцом (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Кабинет\nпродавца" as SellerUI
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nкаталога" as Catalog
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Seller -> SellerUI : добавить или изменить товар\n(описание, цена, остаток)
+SellerUI -> API : изменить каталог (токен)
+API -> Auth : проверить токен
+Auth --> API : id продавца, роль «продавец»
+API -> Catalog : создать или изменить товар\n(данные, id продавца, роль)
+Catalog -> Catalog : проверить права:\nтолько свои товары
+break товар другого продавца
+  Catalog --> API : отказ
+  API --> SellerUI : отказ
+  SellerUI --> Seller : сообщение об отказе
+end
+Catalog -> Catalog : сохранить изменения,\nзаписать историю,\nотправить на модерацию
+Catalog -> Bus : событие «товар изменён»\n(что, кем, когда)
+Bus -> Log : событие для журнала
+Catalog --> API : принято, статус «На модерации»
+API --> SellerUI : принято
+SellerUI --> Seller : товар отправлен на модерацию
+@enduml

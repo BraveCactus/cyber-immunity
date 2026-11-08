@@ -1,0 +1,53 @@
+@startuml
+title С3. Оформление заказа (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Витрина\nпокупателя" as Store
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис\nзаказов" as Order
+participant "Сервис\nкаталога" as Catalog
+participant "Сервис\nпрофилей" as Profile
+participant "Платежный\nинтегратор" as Payment
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Buyer -> Store : оформить заказ\n(состав, адрес, контакты)
+Store -> API : создать заказ (токен входа)
+API -> Auth : проверить токен
+Auth --> API : id покупателя, роль
+API -> Order : создать заказ\n(id покупателя, роль,\nсостав, адрес, контакты)
+Order -> Catalog : проверить наличие и цены
+Catalog --> Order : результат проверки
+break товар недоступен или цена изменилась
+  Order --> API : отказ
+  API --> Store : отказ
+  Store --> Buyer : обновить корзину
+end
+opt адрес или контакты не указаны
+  Order -> Profile : запросить адрес и контакты
+  Profile --> Order : адрес, контакты
+end
+Order -> Order : создать заказ,\nстатус «Ожидание оплаты»
+Order -> Payment : создать платёж\n(сумма, id заказа)
+Payment -> PayExt : создать платёж\n(сумма, id заказа)
+PayExt --> Payment : id платежа, ссылка на оплату
+Payment --> Order : ссылка на оплату
+Order -> Bus : событие «заказ создан»
+Bus -> Log : событие для журнала
+Order --> API : заказ создан, ссылка на оплату
+API --> Store : заказ создан, ссылка на оплату
+Store --> Buyer : переход к оплате
+@enduml

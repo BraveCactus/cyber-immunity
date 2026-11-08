@@ -1,0 +1,31 @@
+@startuml
+title С7. Возврат заказа
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Сервис\nонлайн-маркетплейса" as S
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Сервис\nуведомлений" as NotifExt #FFF4E0
+
+Buyer -> S : запросить возврат\n(заказ, причина)
+S -> S : проверить условия возврата
+break условия не выполнены
+  S --> Buyer : отказ
+end
+S -> PayExt : вернуть деньги\n(сумма, номер заказа)
+PayExt --> S : результат возврата
+S -> S : заказ в статусе «Возврат»,\nначисление продавцу отменено
+S -> NotifExt : письмо о статусе заказа\n(адрес, шаблон)
+NotifExt --> Buyer : письмо: возврат оформлен
+S --> Buyer : возврат оформлен
+@enduml

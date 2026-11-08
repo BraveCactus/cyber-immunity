@@ -1,0 +1,29 @@
+@startuml
+title С4. Оплата заказа (сценарий)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Сервис\nонлайн-маркетплейса" as S
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Сервис\nуведомлений" as NotifExt #FFF4E0
+
+Buyer -> PayExt : данные карты,\nподтверждение оплаты
+PayExt -> S : результат оплаты\n(номер заказа)
+alt оплата прошла
+  S -> S : заказ передан\nна комплектацию
+  S -> NotifExt : письмо о статусе заказа\n(адрес, шаблон)
+  NotifExt --> Buyer : письмо: заказ оплачен
+else оплата не прошла
+  S -> S : заказ остаётся\nв ожидании оплаты
+end
+@enduml

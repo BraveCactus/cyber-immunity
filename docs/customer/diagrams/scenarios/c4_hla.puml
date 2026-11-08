@@ -1,0 +1,45 @@
+@startuml
+title С4. Оплата заказа (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Платежный\nинтегратор" as Payment
+participant "Шина\nсобытий" as Bus
+participant "Сервис\nзаказов" as Order
+participant "Сервис\nуведомлений" as Notify
+participant "Внешний сервис\nуведомлений" as NotifExt #FFF4E0
+participant "Логирование" as Log
+
+Buyer -> PayExt : данные карты,\nподтверждение оплаты
+note right of PayExt : Данные карты вводятся на стороне\nплатёжного сервиса, платформа их не получает
+PayExt -> Payment : результат оплаты\n(id платежа, id заказа)
+PayExt -> Buyer: сообщение о статусе оплаты
+alt оплата прошла
+  Payment -> Bus : событие «оплата прошла»
+  Bus -> Order : оплата прошла
+  Order -> Order : статус «Комплектация»
+  Order -> Bus : событие «заказ оплачен»\n(id заказа, email покупателя)
+  par
+    Bus -> Notify : заказ оплачен
+    Notify -> NotifExt : письмо покупателю\n(адрес, шаблон)
+  else
+    Bus -> Log : события для журнала
+  end
+else оплата не прошла
+  Payment -> Bus : событие «оплата не прошла»
+  Bus -> Order : оплата не прошла
+  Order -> Order : статус остаётся\n«Ожидание оплаты»
+  Bus -> Log : события для журнала
+end
+@enduml

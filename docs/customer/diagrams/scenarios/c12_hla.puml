@@ -1,0 +1,38 @@
+@startuml
+title С12. Управление ролями администратором (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Администратор" as Admin
+participant "Администрирование\nи поддержка" as BackUI
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Admin -> BackUI : изменить роль пользователя\n(пользователь, роль)
+BackUI -> API : запрос изменения роли (токен, код)
+API -> Auth : проверить токен
+Auth --> API : id администратора, роль «администратор»
+API -> Auth : изменить роль\n(id пользователя, новая роль,\nid администратора)
+Auth -> Auth : проверить право администратора,\nизменить роль, завершить сессии пользователя
+break проверка не пройдена
+  Auth --> API : отказ
+  API --> BackUI : отказ
+  BackUI --> Admin : сообщение об отказе
+end
+Auth -> Bus : событие «роль изменена»\n(кто, кому, какая роль)
+Bus -> Log : событие для журнала
+Auth --> API : роль изменена
+API --> BackUI : роль изменена
+BackUI --> Admin : роль изменена
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+title С9. Вывод средств продавцом
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Сервис\nонлайн-маркетплейса" as S
+participant "Платежный\nсервис" as PayExt #FFF4E0
+
+Seller -> S : запросить вывод средств\n(сумма, код подтверждения)
+S -> S : проверить код, баланс,\nлимиты, срок возврата
+break проверка не пройдена
+  S --> Seller : отказ
+end
+S -> PayExt : выплата\n(сумма, реквизиты)
+PayExt --> S : результат выплаты
+S --> Seller : выплата проведена
+@enduml

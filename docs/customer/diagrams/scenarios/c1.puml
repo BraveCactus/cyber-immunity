@@ -1,0 +1,30 @@
+@startuml
+title С1. Вход в систему
+
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+
+hide footbox
+
+actor "Пользователь" as User
+participant "Сервис\nонлайн-маркетплейса" as S
+
+User -> S : логин и пароль
+
+alt Данные верны
+  S --> User : доступ к функциям\nв соответствии с ролью
+else Данные неверны
+  S --> User : отказ во входе
+end
+
+@enduml

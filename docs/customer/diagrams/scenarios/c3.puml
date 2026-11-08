@@ -1,0 +1,27 @@
+@startuml
+title С3. Оформление заказа (сценарий)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Сервис\nонлайн-маркетплейса" as S
+participant "Платежный\nсервис" as PayExt #FFF4E0
+
+Buyer -> S : оформить заказ\n(состав, адрес, контакты)
+S -> S : проверить наличие\nи актуальные цены
+break товар недоступен или цена изменилась
+  S --> Buyer : отказ, обновить корзину
+end
+S -> PayExt : создать платёж\n(сумма, номер заказа)
+PayExt --> S : ссылка на оплату
+S --> Buyer : заказ создан, ожидает оплаты,\nссылка на оплату
+@enduml

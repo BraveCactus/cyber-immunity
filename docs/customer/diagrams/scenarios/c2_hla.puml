@@ -1,0 +1,29 @@
+@startuml
+title С2. Просмотр каталога (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Покупатель" as Buyer
+participant "Витрина\nпокупателя" as Store
+participant "API" as API
+participant "Сервис\nкаталога" as Catalog
+participant "Сервис\nотзывов" as Review
+
+Buyer -> Store : открыть каталог, поиск
+Store -> API : запрос списка товаров
+API -> Catalog : найти товары\n(фильтры, страница)
+Catalog --> API : товары, описания, цены
+API -> Review : рейтинги этих товаров
+Review --> API : рейтинги
+API --> Store : товары, цены, рейтинги
+Store --> Buyer : показать каталог
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+title С9. Вывод средств продавцом (HLA)
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam maxMessageSize 220
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+  ParticipantBackgroundColor #F5F8FF
+  ParticipantBorderColor #3B5B92
+  ActorBackgroundColor #FFF4E0
+  ActorBorderColor #C48A1A
+}
+hide footbox
+actor "Продавец" as Seller
+participant "Кабинет\nпродавца" as SellerUI
+participant "API" as API
+participant "Сервис\nаутентификации\nи ролей" as Auth
+participant "Сервис расчета\nс продавцами" as Payout
+participant "Платежный\nинтегратор" as Payment
+participant "Платежный\nсервис" as PayExt #FFF4E0
+participant "Шина\nсобытий" as Bus
+participant "Логирование" as Log
+
+Seller -> SellerUI : запросить вывод средств\n(сумма, код подтверждения)
+SellerUI -> API : запрос вывода (токен, код)
+API -> Auth : проверить токен и код подтверждения
+Auth --> API : id продавца, роль, подтверждено
+API -> Payout : вывод средств\n(id продавца, сумма)
+Payout -> Payout : проверить баланс, лимиты,\nсрок возврата
+break проверка не пройдена
+  Payout --> API : отказ
+  API --> SellerUI : отказ
+  SellerUI --> Seller : сообщение об отказе
+end
+Payout -> Payout : зарезервировать сумму на балансе
+Payout -> Payment : выплатить продавцу\n(сумма, реквизиты)
+Payment -> PayExt : выплата\n(сумма, реквизиты)
+PayExt --> Payment : результат выплаты
+Payment --> Payout : результат выплаты
+alt выплата проведена
+  Payout -> Payout : списать сумму с баланса
+  Payout -> Bus : событие «выплата проведена»
+  Bus -> Log : событие для журнала
+  Payout --> API : выплата проведена
+  API --> SellerUI : выплата проведена
+  SellerUI --> Seller : выплата проведена
+else выплата отклонена
+  Payout -> Payout : снять резерв
+  Payout -> Bus : событие «выплата отклонена»
+  Bus -> Log : событие для журнала
+  Payout --> API : ошибка выплаты
+  API --> SellerUI : ошибка выплаты
+  SellerUI --> Seller : сообщение об ошибке
+end
+@enduml
