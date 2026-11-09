@@ -7,7 +7,6 @@ stateDiagram-v2
     state "Ожидание оплаты" as AwaitingPayment
     state "Оплачен" as Paid
     state "Комплектация" as Packing
-    state "Приостановлен" as Suspended
     state "Передача в доставку" as Handover
     state "В доставке" as InDelivery
     state "Доставлен" as Delivered
@@ -19,11 +18,8 @@ stateDiagram-v2
     Catalog --> Checkout: покупатель выбрал товар
     Checkout --> AwaitingPayment: заказ создан
     AwaitingPayment --> Paid: платёжный сервис подтвердил оплату
-    AwaitingPayment --> Cancelled: отказ или таймаут
+    AwaitingPayment --> Cancelled: ошибка при оплате
     Paid --> Packing: продавец принял заказ
-    Packing --> Suspended: администратор или поддержка
-    Suspended --> Packing: проверка завершена
-    Suspended --> Cancelled: нарушение правил
     Packing --> Handover: продавец передал заказ
     Handover --> InDelivery: служба доставки приняла заказ
     InDelivery --> Delivered: служба доставки передала статус
